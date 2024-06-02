@@ -187,12 +187,15 @@ try:
 except webuntis.errors.AuthError:
     logging.error("Authentifizierungsfehler: Überprüfe die Anmeldedaten")
 except webuntis.errors.RemoteError as e:
-    logging.error(f"RemoteError: {e.message}")  # Keine Attribute 'code' und 'message' verwenden
+    logging.error(f"RemoteError: {str(e)}")  # Direkt die Exception-Nachricht loggen
 except Exception as e:
-    logging.error(f"Ein unerwarteter Fehler ist aufgetreten: {e}")
+    logging.error(f"Ein unerwarteter Fehler ist aufgetreten: {str(e)}")
 finally:
-    try:
-        sitzung.logout()
-        logging.info("Abmeldung erfolgreich")
-    except KeyError:
-        logging.warning("Abmeldung fehlgeschlagen: Kein gültiges jsessionid gefunden")
+    if 'jsessionid' in sitzung.options.get('credentials', {}):
+        try:
+            sitzung.logout()
+            logging.info("Abmeldung erfolgreich")
+        except KeyError:
+            logging.warning("Abmeldung fehlgeschlagen: Kein gültiges jsessionid gefunden")
+    else:
+        logging.warning("Keine Abmeldung erforderlich: Keine aktive Sitzung gefunden")
